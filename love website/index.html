@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>For Siddhi • From Jaiesh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500;600&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a0a14 0%, #2d1225 30%, #4a1c3a 60%, #6b2d4f 100%);
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+      position: relative;
+      color: #fff;
+    }
+
+    /* Soft glowing orbs in background */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb1 { width: 400px; height: 400px; background: #ff69b4; top: -100px; left: -100px; }
+    .orb2 { width: 350px; height: 350px; background: #c71585; bottom: -80px; right: -80px; }
+    .orb3 { width: 280px; height: 280px; background: #ff1493; top: 40%; left: 60%; }
+
+    /* Floating interactive hearts */
+    .floating-heart {
+      position: fixed;
+      font-size: 22px;
+      cursor: pointer;
+      z-index: 5;
+      user-select: none;
+      transition: transform 0.2s;
+      animation: floatUp linear infinite;
+    }
+    .floating-heart:hover {
+      transform: scale(1.3);
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+      100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Heart explosion particles */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      font-size: 14px;
+      z-index: 100;
+      animation: explode 0.8s forwards;
+    }
+    @keyframes explode {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0) translate(var(--tx), var(--ty)); opacity: 0; }
+    }
+
+    /* ========== UNLOCK SCREEN ========== */
+    #unlock-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1a0a14, #3d152e);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      transition: opacity 0.9s ease, visibility 0.9s;
+    }
+    #unlock-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .unlock-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 182, 193, 0.25);
+      border-radius: 32px;
+      padding: 50px 40px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    }
+
+    .unlock-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 3.2rem;
+      color: #ffb6c1;
+      margin-bottom: 6px;
+    }
+
+    .unlock-sub {
+      color: #ffc0cb;
+      font-size: 0.95rem;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    #password-input {
+      width: 100%;
+      padding: 15px 22px;
+      border-radius: 50px;
+      border: 2px solid rgba(255,182,193,0.4);
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 1.1rem;
+      text-align: center;
+      outline: none;
+      transition: all 0.3s;
+    }
+    #password-input::placeholder { color: rgba(255,255,255,0.5); }
+    #password-input:focus {
+      border-color: #ff69b4;
+      background: rgba(255,255,255,0.15);
+    }
+
+    #unlock-btn {
+      margin-top: 22px;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #ff69b4, #c71585);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 10px 25px rgba(255,105,180,0.35);
+    }
+    #unlock-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(255,105,180,0.45);
+    }
+
+    .error-msg {
+      color: #ff6b8a;
+      margin-top: 16px;
+      height: 22px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.95rem;
+    }
+    .error-msg.show { opacity: 1; }
+
+    /* ========== MAIN EXPERIENCE ========== */
+    #main-screen {
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 80px;
+      position: relative;
+      z-index: 10;
+    }
+    #main-screen.visible {
+      display: flex;
+    }
+
+    .from-text {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.8rem;
+      color: #ffb6c1;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(255,182,193,0.5);
+      animation: softGlow 3s ease-in-out infinite;
+    }
+    @keyframes softGlow {
+      0%, 100% { text-shadow: 0 0 15px rgba(255,182,193,0.4); }
+      50% { text-shadow: 0 0 30px rgba(255,182,193,0.8); }
+    }
+
+    .siddhi-name {
+      font-family: 'Great Vibes', cursive;
+      font-size: 4.5rem;
+      color: #fff;
+      margin: 10px 0 30px;
+      position: relative;
+      text-shadow: 0 0 30px rgba(255,105,180,0.6);
+    }
+    .siddhi-name .heart-left,
+    .siddhi-name .heart-right {
+      font-size: 2.2rem;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      animation: pulseHeart 1.8s infinite;
+    }
+    .heart-left { left: -55px; }
+    .heart-right { right: -55px; }
+    @keyframes pulseHeart {
+      0%, 100% { transform: translateY(-50%) scale(1); }
+      50% { transform: translateY(-50%) scale(1.25); }
+    }
+
+    /* Poem Card */
+    .poem-card {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 182, 193, 0.2);
+      border-radius: 28px;
+      padding: 45px 40px;
+      max-width: 720px;
+      width: 100%;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .poem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #ff69b4, #ffb6c1, #ff69b4, transparent);
+    }
+
+    .poem-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.45rem;
+      line-height: 1.85;
+      color: #ffe4ec;
+      text-align: center;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .poem-text.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .progress-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 30px 0 25px;
+    }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(255,182,193,0.3);
+      transition: all 0.35s;
+    }
+    .dot.active {
+      background: #ff69b4;
+      transform: scale(1.4);
+      box-shadow: 0 0 12px #ff69b4;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 13px 32px;
+      border-radius: 50px;
+      border: none;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-back {
+      background: rgba(255,255,255,0.1);
+      color: #ffb6c1;
+      border: 1.5px solid rgba(255,182,193,0.4);
+    }
+    .btn-back:hover:not(:disabled) {
+      background: rgba(255,182,193,0.15);
+      transform: translateY(-2px);
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #ff69b4, #c71585);
+      color: white;
+      box-shadow: 0 8px 25px rgba(255,105,180,0.35);
+    }
+    .btn-next:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(255,105,180,0.5);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Side button - Back to password */
+    .side-btn {
+      position: fixed;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,182,193,0.3);
+      color: #ffb6c1;
+      padding: 18px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      transition: all 0.3s;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+    }
+    .side-btn:hover {
+      background: rgba(255,105,180,0.2);
+      color: #fff;
+    }
+
+    .dedication {
+      margin-top: 35px;
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.35rem;
+      color: #ffb6c1;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .siddhi-name { font-size: 3.2rem; }
+      .heart-left { left: -40px; font-size: 1.7rem; }
+      .heart-right { right: -40px; font-size: 1.7rem; }
+      .poem-card { padding: 35px 24px; }
+      .poem-text { font-size: 1.25rem; min-height: 200px; }
+      .side-btn { left: 10px; padding: 14px 9px; font-size: 0.8rem; }
+      .from-text { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background orbs -->
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+
+  <!-- ========== UNLOCK SCREEN ========== -->
+  <div id="unlock-screen">
+    <div class="unlock-card">
+      <h1 class="unlock-title">For You</h1>
+      <p class="unlock-sub">Enter the secret name to unlock ❤️</p>
+      <input type="text" id="password-input" placeholder="Type the name..." autocomplete="off" spellcheck="false">
+      <button id="unlock-btn">Unlock with Love</button>
+      <p class="error-msg" id="error-msg">That's not the right name...</p>
+    </div>
+  </div>
+
+  <!-- ========== MAIN SCREEN ========== -->
+  <div id="main-screen">
+    <div class="from-text">From Your Love Jaiesh</div>
+
+    <div class="siddhi-name">
+      <span class="heart-left">💕</span>
+      Siddhi
+      <span class="heart-right">💕</span>
+    </div>
+
+    <div class="poem-card">
+      <div class="poem-text" id="poem-text"></div>
+
+      <div class="progress-dots" id="progress-dots"></div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn btn-back" id="btn-back" onclick="goBack()">← Go Back</button>
+        <button class="nav-btn btn-next" id="btn-next" onclick="goNext()">Go to Next →</button>
+      </div>
+    </div>
+
+    <div class="dedication" id="dedication" style="display:none;">
+      Dedicated to: Siddhi My Love 💕<br>
+      <span style="font-size:1.1rem; opacity:0.8;">— Jaiesh Sahadeo</span>
+    </div>
+  </div>
+
+  <!-- Side button -->
+  <button class="side-btn" id="side-btn" onclick="goBackToPassword()" style="display:none;">
+    Back to Password
+  </button>
+
+  <script>
+    // ====================== CONFIG ======================
+    const CORRECT_PASSWORD = "SiddhiIsBaeee";
+
+    // Poem split into smooth paragraphs
+    const paragraphs = [
+      `"The First Kiss - The Experience of A Lifetime"`,
+
+      `The world grew quiet for a moment,\nAs if the stars had paused to witness,\nA divine act, a single kiss, so soft, so gentle,\nBecome a memory I can never forget.`,
+
+      `It wasn't simply just a moment,\nIt felt like something out of this world,\nA little piece of magic happened\nThe instant I was close to you.`,
+
+      `Your presence made the moment feel so special,\nYour smile made everything feel right,\nAnd somehow, in that little second,\nYou made the whole world feel so light.`,
+
+      `That first kiss became a treasure,\nA memory I'll forever hold,\nBecause with you, the simplest moments\nCan feel more precious than gold.`,
+
+      `And now I'm deeply attached to you,\nMore than these simple words can say,\nFor you have found a special place\nIn my heart that won't fade away.`,
+
+      `If I could return to that moment,\nI'd choose it just the same again and again\nBecause that magical kiss with you\nWas where a new chapter began.`,
+
+      `As I close my eyes to sleep\nThe first thing I see is that moment\nMy heart grows softer and softer for you\nAs I sleep carelessly with the thought of you.`,
+
+      `Words cannot define this type of feelings\nWhen your eyes are looking into mine,\nFelt as though the earth had stopped rotating\nMy heart melts at looking into your eyes.`,
+
+      `I can sit all day and write\nBut all the pages and pens\nIn the world might not be enough,\nIt truly is more than just a kiss.`
+    ];
+
+    // ====================== ELEMENTS ======================
+    const unlockScreen = document.getElementById('unlock-screen');
+    const mainScreen = document.getElementById('main-screen');
+    const passwordInput = document.getElementById('password-input');
+    const unlockBtn = document.getElementById('unlock-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const poemText = document.getElementById('poem-text');
+    const progressDots = document.getElementById('progress-dots');
+    const btnBack = document.getElementById('btn-back');
+    const btnNext = document.getElementById('btn-next');
+    const sideBtn = document.getElementById('side-btn');
+    const dedication = document.getElementById('dedication');
+
+    let current = 0;
+
+    // Create dots
+    paragraphs.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      if (i === 0) dot.classList.add('active');
+      progressDots.appendChild(dot);
+    });
+
+    // ====================== UNLOCK ======================
+    function tryUnlock() {
+      const entered = passwordInput.value.trim();
+      if (entered.toLowerCase() === CORRECT_PASSWORD.toLowerCase()) {
+        unlockScreen.classList.add('hidden');
+        setTimeout(() => {
+          mainScreen.classList.add('visible');
+          sideBtn.style.display = 'block';
+          updatePoem();
+          startHeartRain();
+        }, 700);
+      } else {
+        errorMsg.classList.add('show');
+        passwordInput.value = '';
+        passwordInput.focus();
+        setTimeout(() => errorMsg.classList.remove('show'), 2200);
+      }
+    }
+
+    unlockBtn.addEventListener('click', tryUnlock);
+    passwordInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryUnlock();
+    });
+
+    // ====================== POEM NAVIGATION ======================
+    function updatePoem() {
+      poemText.classList.remove('visible');
+      
+      setTimeout(() => {
+        poemText.innerText = paragraphs[current];
+        poemText.classList.add('visible');
+
+        // Update dots
+        document.querySelectorAll('.dot').forEach((d, i) => {
+          d.classList.toggle('active', i === current);
+        });
+
+        btnBack.disabled = current === 0;
+        btnNext.disabled = current === paragraphs.length - 1;
+
+        // Show dedication only on last paragraph
+        dedication.style.display = current === paragraphs.length - 1 ? 'block' : 'none';
+      }, 280);
+    }
+
+    function goNext() {
+      if (current < paragraphs.length - 1) {
+        current++;
+        updatePoem();
+      }
+    }
+
+    function goBack() {
+      if (current > 0) {
+        current--;
+        updatePoem();
+      }
+    }
+
+    function goBackToPassword() {
+      mainScreen.classList.remove('visible');
+      sideBtn.style.display = 'none';
+      unlockScreen.classList.remove('hidden');
+      passwordInput.value = '';
+      passwordInput.focus();
+      current = 0;
+      // stop creating new hearts temporarily
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', e => {
+      if (!mainScreen.classList.contains('visible')) return;
+      if (e.key === 'ArrowRight' || e.key === ' ') goNext();
+      if (e.key === 'ArrowLeft') goBack();
+    });
+
+    // ====================== INTERACTIVE HEARTS ======================
+    const heartEmojis = ['💖', '💕', '💗', '💓', '💞', '❤️', '💘', '💝', '♥️'];
+
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.className = 'floating-heart';
+      heart.innerText = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+      heart.style.left = Math.random() * 96 + 'vw';
+      heart.style.fontSize = (16 + Math.random() * 18) + 'px';
+      heart.style.animationDuration = (7 + Math.random() * 9) + 's';
+      heart.style.opacity = 0.5 + Math.random() * 0.4;
+
+      // Click to explode
+      heart.addEventListener('click', function explode(e) {
+        const x = e.clientX;
+        const y = e.clientY;
+        
+        // Create particles
+        for (let i = 0; i < 10; i++) {
+          const p = document.createElement('div');
+          p.className = 'particle';
+          p.innerText = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+          p.style.left = x + 'px';
+          p.style.top = y + 'px';
+          const angle = (i / 10) * Math.PI * 2;
+          const dist = 60 + Math.random() * 50;
+          p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+          p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+          document.body.appendChild(p);
+          setTimeout(() => p.remove(), 800);
+        }
+        
+        heart.remove();
+      });
+
+      document.body.appendChild(heart);
+
+      // Remove after animation
+      setTimeout(() => {
+        if (heart.parentNode) heart.remove();
+      }, 16000);
+    }
+
+    function startHeartRain() {
+      // Initial burst
+      for (let i = 0; i < 12; i++) {
+        setTimeout(createHeart, i * 300);
+      }
+      // Continuous
+      setInterval(createHeart, 1200);
+    }
+
+    // Focus input on load
+    passwordInput.focus();
+  </script>
+</body>
+</html>
