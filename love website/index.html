@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>For Siddhi 💕</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Playfair+Display:wght@500;700&family=Great+Vibes&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a0a12 0%, #3b0a2a 40%, #5c0a3a 100%);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      color: #fff;
+    }
+
+    /* Animated background hearts pattern */
+    .bg-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-heart {
+      position: absolute;
+      color: rgba(255, 105, 180, 0.15);
+      font-size: 24px;
+      animation: rise 12s linear infinite;
+      user-select: none;
+    }
+
+    @keyframes rise {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.4; }
+      90% { opacity: 0.2; }
+      100% { transform: translateY(-120px) rotate(360deg); opacity: 0; }
+    }
+
+    /* Interactive clickable hearts */
+    .interactive-heart {
+      position: absolute;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 5;
+      transition: transform 0.2s;
+      user-select: none;
+      filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.6));
+    }
+
+    .interactive-heart:hover {
+      transform: scale(1.3);
+    }
+
+    .explode {
+      animation: explode 0.6s forwards;
+    }
+
+    @keyframes explode {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.8); opacity: 0.8; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    /* ========== UNLOCK SCREEN ========== */
+    #unlock-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1a0a12, #4a0a2e);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      transition: opacity 0.7s ease, visibility 0.7s ease;
+    }
+
+    #unlock-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .unlock-box {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 182, 193, 0.3);
+      padding: 50px 40px;
+      border-radius: 30px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .unlock-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 3.2rem;
+      color: #ff69b4;
+      margin-bottom: 6px;
+    }
+
+    .unlock-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .unlock-subtitle {
+      color: #ffb6c1;
+      font-size: 0.95rem;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    #password-input {
+      width: 100%;
+      padding: 15px 22px;
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      border-radius: 50px;
+      font-size: 1.1rem;
+      text-align: center;
+      outline: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s;
+    }
+
+    #password-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    #password-input:focus {
+      border-color: #ff69b4;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    #unlock-btn {
+      margin-top: 22px;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #ff69b4, #c71585);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 10px 25px rgba(255, 105, 180, 0.35);
+    }
+
+    #unlock-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(255, 105, 180, 0.5);
+    }
+
+    .error-msg {
+      color: #ff6b8a;
+      font-size: 0.9rem;
+      margin-top: 16px;
+      height: 22px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .error-msg.show {
+      opacity: 1;
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 780px;
+      padding: 20px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease;
+      display: none;
+    }
+
+    .main-wrapper.visible {
+      opacity: 1;
+      transform: translateY(0);
+      display: block;
+    }
+
+    .top-banner {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .from-text {
+      font-family: 'Great Vibes', cursive;
+      font-size: 1.9rem;
+      color: #ffb6c1;
+      letter-spacing: 1px;
+    }
+
+    .siddhi-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      color: #fff;
+      margin: 8px 0 4px;
+      text-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+    }
+
+    .hearts-around {
+      color: #ff69b4;
+      font-size: 1.3rem;
+      letter-spacing: 8px;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 182, 193, 0.25);
+      border-radius: 28px;
+      padding: 40px 36px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
+    .poem-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      color: #ff69b4;
+      margin-bottom: 28px;
+      font-weight: 700;
+    }
+
+    .message-box {
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .message {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.45rem;
+      line-height: 1.75;
+      color: #ffe4ec;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: all 0.55s ease;
+      max-width: 620px;
+      white-space: pre-line;
+    }
+
+    .message.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .progress {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: rgba(255, 182, 193, 0.35);
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: #ff69b4;
+      transform: scale(1.35);
+      box-shadow: 0 0 12px #ff69b4;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 13px 28px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .btn-back {
+      background: transparent;
+      color: #ffb6c1;
+      border: 2px solid rgba(255, 182, 193, 0.5);
+    }
+
+    .btn-back:hover:not(:disabled) {
+      background: rgba(255, 182, 193, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #ff69b4, #c71585);
+      color: white;
+      box-shadow: 0 8px 20px rgba(255, 105, 180, 0.35);
+    }
+
+    .btn-next:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(255, 105, 180, 0.5);
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .back-to-pass {
+      position: fixed;
+      top: 22px;
+      left: 22px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 182, 193, 0.3);
+      color: #ffb6c1;
+      padding: 10px 18px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      z-index: 50;
+      transition: all 0.25s;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .back-to-pass.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .back-to-pass:hover {
+      background: rgba(255, 105, 180, 0.2);
+      color: #fff;
+    }
+
+    .final-heart {
+      font-size: 2.6rem;
+      margin-top: 18px;
+      animation: pulse 1.5s infinite;
+      display: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Responsive */
+    @media (max-width: 650px) {
+      .container {
+        padding: 30px 22px;
+      }
+      .message {
+        font-size: 1.25rem;
+      }
+      .siddhi-name {
+        font-size: 2rem;
+      }
+      .poem-title {
+        font-size: 1.4rem;
+      }
+      .from-text {
+        font-size: 1.6rem;
+      }
+      .btn {
+        padding: 12px 22px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background rising hearts -->
+  <div class="bg-hearts" id="bgHearts"></div>
+
+  <!-- Interactive hearts container -->
+  <div id="interactiveHearts"></div>
+
+  <!-- ========== UNLOCK SCREEN ========== -->
+  <div id="unlock-screen">
+    <div class="unlock-box">
+      <h1 class="unlock-title">For You</h1>
+      <div class="unlock-name">💕 Siddhi 💕</div>
+      <p class="unlock-subtitle">Enter the secret name to open this letter</p>
+      
+      <input 
+        type="text" 
+        id="password-input" 
+        placeholder="Type here..." 
+        autocomplete="off"
+        spellcheck="false"
+      />
+      
+      <button id="unlock-btn">Unlock with Love</button>
+      
+      <p class="error-msg" id="error-msg">That's not the right name...</p>
+    </div>
+  </div>
+
+  <!-- Back to password button -->
+  <button class="back-to-pass" id="backToPass" onclick="goToPassword()">← Back to Password</button>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="main-wrapper" id="main-content">
+    <div class="top-banner">
+      <div class="from-text">From Your Love Jaiesh</div>
+      <div class="siddhi-name">Siddhi</div>
+      <div class="hearts-around">♥ ♥ ♥ ♥ ♥</div>
+    </div>
+
+    <div class="container">
+      <h2 class="poem-title">The First Kiss — The Experience of A Lifetime</h2>
+
+      <div class="message-box">
+        <p class="message" id="message"></p>
+      </div>
+
+      <div class="progress" id="progress"></div>
+
+      <div class="buttons">
+        <button class="btn btn-back" id="btnBack" onclick="goBack()">← Go Back</button>
+        <button class="btn btn-next" id="btnNext" onclick="goNext()">Go to Next →</button>
+      </div>
+
+      <div class="final-heart" id="finalHeart">💖</div>
+    </div>
+  </div>
+
+  <script>
+    // ====================== PASSWORD ======================
+    const CORRECT_PASSWORD = "SiddhiIsBaeee";
+
+    // ====================== POEM PARAGRAPHS ======================
+    const phases = [
+      "The world grew quiet for a moment,\nAs if the stars had paused to witness,\nA divine act, a single kiss, so soft, so gentle,\nBecome a memory I can never forget.",
+
+      "It wasn't simply just a moment,\nIt felt like something out of this world,\nA little piece of magic happened\nThe instant I was close to you.",
+
+      "Your presence made the moment feel so special,\nYour smile made everything feel right,\nAnd somehow, in that little second,\nYou made the whole world feel so light.",
+
+      "That first kiss became a treasure,\nA memory I'll forever hold,\nBecause with you, the simplest moments\nCan feel more precious than gold.",
+
+      "And now I'm deeply attached to you,\nMore than these simple words can say,\nFor you have found a special place\nIn my heart that won't fade away.",
+
+      "If I could return to that moment,\nI'd choose it just the same again and again\nBecause that magical kiss with you\nWas where a new chapter began.",
+
+      "As I close my eyes to sleep\nThe first thing I see is that moment\nMy heart grows softer and softer for you\nAs I sleep carelessly with the thought of you.",
+
+      "Words cannot define this type of feelings\nWhen your eyes are looking into mine,\nFelt as though the earth had stopped rotating\nMy heart melts at looking into your eyes.",
+
+      "I can sit all day and write\nBut all the pages and pens\nIn the world might not be enough,\nIt truly is more than just a kiss.",
+
+      "Dedicated to:\nSiddhi My Love 💕\n\n— Jaiesh Sahadeo"
+    ];
+
+    // ====================== ELEMENTS ======================
+    const unlockScreen = document.getElementById('unlock-screen');
+    const passwordInput = document.getElementById('password-input');
+    const unlockBtn = document.getElementById('unlock-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const mainContent = document.getElementById('main-content');
+    const messageEl = document.getElementById('message');
+    const progressEl = document.getElementById('progress');
+    const btnBack = document.getElementById('btnBack');
+    const btnNext = document.getElementById('btnNext');
+    const finalHeart = document.getElementById('finalHeart');
+    const backToPassBtn = document.getElementById('backToPass');
+
+    let current = 0;
+
+    // Create progress dots
+    phases.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      if (i === 0) dot.classList.add('active');
+      progressEl.appendChild(dot);
+    });
+
+    // ====================== UNLOCK ======================
+    function tryUnlock() {
+      const entered = passwordInput.value.trim();
+      if (entered.toLowerCase() === CORRECT_PASSWORD.toLowerCase()) {
+        unlockScreen.classList.add('hidden');
+        setTimeout(() => {
+          mainContent.style.display = 'block';
+          mainContent.classList.add('visible');
+          backToPassBtn.classList.add('visible');
+          updateUI();
+          spawnInteractiveHearts();
+        }, 500);
+      } else {
+        errorMsg.classList.add('show');
+        passwordInput.value = '';
+        passwordInput.focus();
+        setTimeout(() => errorMsg.classList.remove('show'), 2200);
+      }
+    }
+
+    unlockBtn.addEventListener('click', tryUnlock);
+    passwordInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryUnlock();
+    });
+
+    // ====================== NAVIGATION ======================
+    function updateUI() {
+      messageEl.classList.remove('visible');
+      setTimeout(() => {
+        messageEl.textContent = phases[current];
+        messageEl.classList.add('visible');
+
+        document.querySelectorAll('.dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === current);
+        });
+
+        btnBack.disabled = current === 0;
+        btnNext.disabled = current === phases.length - 1;
+        finalHeart.style.display = current === phases.length - 1 ? 'block' : 'none';
+      }, 280);
+    }
+
+    function goNext() {
+      if (current < phases.length - 1) {
+        current++;
+        updateUI();
+      }
+    }
+
+    function goBack() {
+      if (current > 0) {
+        current--;
+        updateUI();
+      }
+    }
+
+    function goToPassword() {
+      mainContent.classList.remove('visible');
+      backToPassBtn.classList.remove('visible');
+      setTimeout(() => {
+        mainContent.style.display = 'none';
+        unlockScreen.classList.remove('hidden');
+        passwordInput.value = '';
+        passwordInput.focus();
+        current = 0;
+      }, 400);
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', e => {
+      if (!unlockScreen.classList.contains('hidden')) return;
+      if (e.key === 'ArrowRight' || e.key === ' ') goNext();
+      if (e.key === 'ArrowLeft') goBack();
+    });
+
+    // ====================== BACKGROUND HEARTS ======================
+    function createBgHearts() {
+      const container = document.getElementById('bgHearts');
+      for (let i = 0; i < 22; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'bg-heart';
+        heart.textContent = ['♥', '💖', '💕', '💗'][Math.floor(Math.random() * 4)];
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.fontSize = (16 + Math.random() * 22) + 'px';
+        heart.style.animationDuration = (9 + Math.random() * 10) + 's';
+        heart.style.animationDelay = Math.random() * 8 + 's';
+        container.appendChild(heart);
+      }
+    }
+
+    // ====================== INTERACTIVE EXPLODING HEARTS ======================
+    function spawnInteractiveHearts() {
+      const container = document.getElementById('interactiveHearts');
+      container.innerHTML = '';
+
+      for (let i = 0; i < 12; i++) {
+        createOneInteractiveHeart(container);
+      }
+    }
+
+    function createOneInteractiveHeart(container) {
+      const heart = document.createElement('div');
+      heart.className = 'interactive-heart';
+      heart.textContent = ['💖', '💕', '💗', '❤️', '💓'][Math.floor(Math.random() * 5)];
+      heart.style.left = Math.random() * 90 + 5 + 'vw';
+      heart.style.top = Math.random() * 80 + 10 + 'vh';
+      heart.style.fontSize = (22 + Math.random() * 18) + 'px';
+
+      heart.addEventListener('click', function () {
+        this.classList.add('explode');
+        setTimeout(() => {
+          this.remove();
+          // spawn a new one
+          createOneInteractiveHeart(container);
+        }, 600);
+      });
+
+      container.appendChild(heart);
+    }
+
+    // Start
+    createBgHearts();
+    passwordInput.focus();
+  </script>
+</body>
+</html>
